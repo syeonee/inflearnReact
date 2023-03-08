@@ -2,36 +2,43 @@ import logo from './logo.svg';
 import './App.css';
 import DiaryEdiotr from './DiaryEditor';
 import DiaryList from './DiaryList';
-
-const dummyList = [
-  {
-    id: 1,
-    author: "syeon",
-    content: "Hi~~~",
-    emotion: 3,
-    created_date: new Date().getTime()
-  },
-  {
-    id: 2,
-    author: "syeon",
-    content: "Lucy~",
-    emotion: 5,
-    created_date: new Date().getTime()
-  },
-  {
-    id: 3,
-    author: "syeon",
-    content: "~~~~~",
-    emotion: 2,
-    created_date: new Date().getTime()
-  },
-];
+import { useState, useRef } from 'react';
 
 function App() {
+  const [data, setData] = useState([]);
+
+  const dataId = useRef(0);
+
+  const onCreate = (author, content, emotion) => {
+    const created_date = new Date().getTime();
+    const newItem = {
+      author,
+      content,
+      emotion,
+      created_date,
+      id: dataId.current
+    }
+    dataId.current += 1;
+    setData([newItem, ...data]);
+  };
+
+  const onDelete = (targetId) => {
+    const newDiaryLlist = data.filter((it) => it.id !== targetId);
+    setData(newDiaryLlist);
+  };
+
+  const onEdit = (targetId, newContent) => {
+    setData(
+      data.map( (it) =>
+        it.id === targetId ? { ...it, content: newContent } : it
+      )
+    );
+  };
+
   return (
     <div className="App">
-      <DiaryEdiotr />
-      <DiaryList diaryList={dummyList} />
+      <DiaryEdiotr onCreate={onCreate} />
+      <DiaryList onEdit={onEdit} onDelete={onDelete} diaryList={data} />
     </div>
   );
 }
