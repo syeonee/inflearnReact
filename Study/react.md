@@ -29,3 +29,132 @@ React Hooks
 useEffect( ()=>{} , [])
 useEffect는 callBack함수, Dependency Array(의존성 배열) 이렇게 두개의 파라미터를 넘겨준다.
 의존성 배열에 들어있는 값이 하나라도 변화하면 콜백함수가 실행된다.
+
+
+
+
+React 연산 최적화
+- Memoization
+이미 계산 해 본 연산 결과를 기억해 두었다가
+동일한 계산을 시키면, 다시 연산하지 않고 기억 해 두었던 데이터를 반환 시키케 하는 방법
+
+
+useMemo( ()=>{} , [])
+useMemo callBack함수, Dependency Array(의존성 배열) 이렇게 두개의 파라미터를 넘겨준다.
+의존성 배열에 들어있는 값이 하나라도 변화하면 콜백함수가 실행된다.
+useMemo는 콜백함수의 리턴값이 리턴되기때문에 
+const getData = useMemo();
+getData() 가 아니라 getData 이렇게 사용해줘야한다.
+
+
+
+const CounterB = React.memo((obj) => {
+    useEffect(() => {
+        console.log(obj.count);
+    })
+});
+
+<button onClick={() => {setObj({count: obj.count})}}>
+
+이런 경우에 count에 obj.count가 그대로 들어가서 rerender가 안될거같지만 실행해보면 rerender된다.
+객체를 비교할 때는 얕은 비교로 객체의 값이 아닌 객체의 주소를 통해 비교하므로 다른 props로 인식하기때문이다.
+
+let a = { count: 1 }
+let b = { count: 1 }
+if (a === b) {
+    console.log("EQUAL");
+} else {
+    console.log("NOT EQUAL");
+}
+
+결과는 NOT EQUAL
+
+let a = { count: 1 }
+let b = a;
+if (a === b) {
+    console.log("EQUAL");
+} else {
+    console.log("NOT EQUAL");
+}
+
+결과는 EQUAL
+
+React.memo(MyComponent, areEqual)
+React.memo에 두번째 인자로 props를 비교하는 함수를 넘겨줄 수 있다.
+이것을 통해 비교하면 된다.
+
+
+ const onCreate = useCallback((author, content, emotion) => {
+    const created_date = new Date().getTime();
+    const newItem = {
+      author,
+      content,
+      emotion,
+      created_date,
+      id: dataId.current
+    }
+    dataId.current += 1;
+    setData([newItem, ...data]);
+  }, []);
+
+위에처럼 setData([newItem, ...data]) 으로 
+사용하면 Dependency 배열이 []으로 들어가 처음에 렌더 될때 한번만 콜백함수가 실행된다.
+그렇게 되면 setData([newItem, ...data]) 에서 data 스테이트는 항상 처음 렌더될 때의 빈 배열만
+가져오기때문에 데이터가 제대로 들어가지 않는다.
+이걸 해결하기 위해서 setData()에 함수형으로 data 스테이트를 가져오도록해서 
+항상 최신의 스테이트를 가져오게 된다.
+밑에 처럼 사용해주면 된다.
+
+ const onCreate = useCallback((author, content, emotion) => {
+    const created_date = new Date().getTime();
+    const newItem = {
+      author,
+      content,
+      emotion,
+      created_date,
+      id: dataId.current
+    }
+    dataId.current += 1;
+    setData((data)=> [newItem, ...data]);
+  }, []);
+
+
+useReducer => 컴포넌트 안에 함수같은 것들 다 넣으니까 길어져서 밖으로 뺄 수 있게 해줌
+dispatch 상태변화를 발생시키는 함수에 {type: 1} 와 같은 Action 객체를 넘겨준다
+Action 객체는 reducer 함수로 
+상태변화 처리는 reducer 함수가 처리한다.
+reducer가 리턴하는 값이 새로운 상태의 값이 된다.
+
+
+
+Context
+부모에서 자식으로 단방향으로만 데이터가 이동할 수 있는 react의 특성때문에
+컴포넌트에서 사용하지 않고 그냥 거쳐가기만 하는 prop들이 있다.
+=> props drilling
+
+
+export default 는 파일 하나당 한개만 사용할 수 있다.
+나머지는 export를 사용해야한다.
+export default를 사용하면 이름을 변경해서 import 받을 수 도 있다.
+export를 사용한 것은 비구조화할당을 통해서만 import를 받을 수 있고 이름을 변경할 수 없다.
+
+Context provider를 통해 data처럼 dispatch를 전달해주면 될거같지만 그러면 안된다.
+context.provider도 컴포넌트이기 때문에 prop이 바뀌면 재생성 된다.
+provider 컴포넌트가 재생성 되면 그 밑에 컴포넌트들도 모두 재생성된다.
+onRemove onCreate같은 dispatch들 value로 보내면 data state가 바뀔때마다 리렌더링 되어서 최적화가 소용없어진다.
+이럴 땐 dispatch를 위한 context를 하나 더 생성해서 사용해주면 된다.
+
+
+onCreate, onRemove, onEdit 같은 함수들을 변하지 않기 때문에 useMemo를 이용해서 항상 같은 값을 전달해줘서
+재생성이 되지 않도록 해준다.
+  const disaptches = {
+    onCreate, onDelete, onEdit
+  }; => 이렇게 하면 App컴포넌트가 재생성 될 때 이 dispatch들도 재생성 된다.
+
+  const memoizedDispatches = useMemo(() => {
+    return {onCreate, onDelete, onEdit};
+  }, []);
+  => 이렇게 useMemo에 빈배열을 넣어줘서 재생성 되지 않도록 해준다.
+
+  memoizedDispatches에서 3개의 함수를 객체로 넘겨주기 때문에
+  const {onCreate} = useContext(DiaryDispatchContext); 이렇게 비구조화 할당으로 가져와야 한다.
