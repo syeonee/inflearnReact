@@ -1,3 +1,7 @@
+react는 
+index.js에서 id 가 root 인 요소의 자식으로 app컴포넌트를 추가하면서 화면에 나타난다.
+
+
 Lifecycle = 생애주기
 react component도 lifecycle을 가진다.
 탄생    => 변화    => 죽음
@@ -158,3 +162,32 @@ onCreate, onRemove, onEdit 같은 함수들을 변하지 않기 때문에 useMem
 
   memoizedDispatches에서 3개의 함수를 객체로 넘겨주기 때문에
   const {onCreate} = useContext(DiaryDispatchContext); 이렇게 비구조화 할당으로 가져와야 한다.
+
+
+
+react-router-dom의  BrowserRouter사용해서 보여준다.
+Routes 컴포넌트 부분이 path 에 따라서 바뀌는 영역이다.
+a태그 사용해서 페이지를 이동하면 spa가 아니라 mpa로 새로 페이지를 받아오기때문에
+Link를 이용해서 전체 페이지 리로드가 아니라 컴포넌트가 바뀔 수 있도록 해준다.
+
+url경로가 변경되면 컴포넌트를 바꿔줘서 페이지가 바뀌는 것 처럼 보여준다.
+페이지 전환 시 깜빡임 없고 이동속도 빠르다
+
+
+react가 제공하는 hook이 아닌 라이브러리가 제공하는 hook
+
+React Router Dom의 기능
+React Router v6
+React 에서 CSR기반의 페이지 라우팅을 할 수 있게 해주는 라이브러리
+
+1. PAth Variavle - useParams
+useParams - path variable들을 객체로 전달해준다. 
+
+
+2. Query String - useSearchParams
+?뒤에 있는 것들이 url경로에 영향을 주지않는다
+const [searchParams, setSearchParams] = useSearchParams();
+배열 비구조화 할당으로 받고 setSearchParams을 통해 쿼리 스트링을 바꿔줄수도 있다.
+
+3. Page Moving - useNavigate
+
