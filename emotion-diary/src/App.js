@@ -19,7 +19,7 @@ const reducer = (state, action) => {
       break;
     }
     case "REMOVE": {
-      newState = state.filter((it) => it.id !== it.targetId);
+      newState = state.filter((it) => it.id !== action.targetId);
       break;
     }
     case "EDIT": {
@@ -44,9 +44,11 @@ function App() {
     const localData = localStorage.getItem('diary');
     if(localData) {
       const diaryList = JSON.parse(localData).sort((a,b) => parseInt(b.id) - parseInt(a.id));
-      dataId.current = parseInt(diaryList[0].id) + 1;
-      
-      dispatch({ type: "INIT", data: diaryList });
+
+      if (diaryList.length >= 1) {
+        dataId.current = parseInt(diaryList[0].id) + 1;
+        dispatch({ type: "INIT", data: diaryList });
+      }      
     }
   }, []);
 
